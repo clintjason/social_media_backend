@@ -31,7 +31,22 @@ module.exports = {
       })
     })
   },
-  getUser: () => {
-    const getQuery = "SELECT";
-  }
+  findUserByEmail: (email) => {
+    //id, username, email, isAdmin, profile, createdAt, updatedAt
+    const getQuery = "SELECT * FROM users WHERE email = ?";
+    return new Promise((resolve, reject) => {
+      db.query(getQuery, [email], (err, res) => {
+        err? reject(err) : resolve(res)
+      })
+    })
+  },
+  findByPk: (id) => {
+    //id, username, email, isAdmin, profile, createdAt, updatedAt
+    const getQuery = "SELECT * FROM users WHERE id = ?";
+    return new Promise((resolve, reject) => {
+      db.query(getQuery, [id], (err, res) => {
+        err? reject(err) : resolve(res)
+      })
+    })
+  },
 }

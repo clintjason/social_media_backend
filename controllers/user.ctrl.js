@@ -1,19 +1,60 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const userModel = require('../models/user.model');
 
 module.exports = {
   signup: async (req, res) => {
+    console.log('signup');
     try {
-      const body = req.body;
-      console.log(body);
-      const result = await userModel.createUser(body);
-      console.log("the result: ", result);
-      if(!result) {
-        throw "Could Not Create User";
+      const found = await userModel.findUserByEmail(req.body.email);
+      console.log(found);
+      if(found.length > 0) {
+        throw {status: 401, message: "User Already Exists"};
       }
-      res.status(500).json({message: "New User Created Successfully."})
+      const hashedPwd = await bcrypt.hash(req.body.password, 10);
+      console.log(hashedPwd);
+      const userData = {
+        ...req.body,
+        password: hashedPwd,
+        profile: "https://res.cloudinary.com/finance-tutoring/image/upload/v1655413937/users/trh0mod2g8ghzw15ep3v.png",
+      }
+      console.log(userData);
+      const result = await userModel.createUser(userData);
+      console.log("the result: ", result);
+      if(!result.affectedRows) {
+        throw {status: 401, message: "Could Not Create User"};
+      }
+      res.status(201).json({message: "New User Created Successfully."})
     } catch (error) {
-      res.status(500).json({"Error": error})
+      res.status(error.status ? error.status: 500).json({"Error": error.message})
     }
-  }
+  },
+  login: async (req, res) => {
+    try {
+      const user = await userModel.findUserByEmail(req.body.email);
+      if(user.length == 0) {
+        throw {status: 404, message: "User not Found"};
+      }
+      let valid = await bcrypt.compare(req.body.password,user[0].password);
+      if(!valid) {
+        throw {status: 403, message: "Password is invalid"};
+      }
+      res.status(200).json({
+        'userId':user[0].id,
+        'isAdmin': user[0].isAdmin,
+        'username': user[0].username,
+        'email': user[0].email,
+        'token': jwt.sign(
+          {
+            userId: user[0].id,
+            isAdmin: user[0].isAdmin
+          },
+          process.env.SECRET_KEY,
+          {expiresIn: process.env.EXPIRE_KEY}),
+        message: "Login Successfully"
+      });
+    } catch (error) {
+      res.status(error.status ? error.status: 500).json({"Error": error.message})
+    }
+  },
 }

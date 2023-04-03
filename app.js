@@ -21,6 +21,4 @@ app.get('/api', (req, res) => {
 app.use('/user/', userRoute);
 
 
-app.listen(process.env.APP_PORT, ()=> {
-  console.log("server running on Port ", process.env.APP_PORT)
-})
+module.exports = app;
