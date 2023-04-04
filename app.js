@@ -3,6 +3,7 @@ const express = require("express");
 const db = require('./models/index.model');
 const userRoute = require("./routes/user.route");
 const cors = require("cors");
+const path = require('path');
 const app = express();
 
 // Config Cors
@@ -19,6 +20,6 @@ app.get('/api', (req, res) => {
 })
 
 app.use('/user/', userRoute);
-
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 module.exports = app;

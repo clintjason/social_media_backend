@@ -1,16 +1,12 @@
 module.exports = (req, res, next) => {
-    if(req.baseUrl === "/api/user") {
+    if(req.baseUrl === "/user") {
         req.imageFolderPath = "images/users";
     }
-    if(req.baseUrl === "/api/post") {
+    if(req.baseUrl === "/post") {
         req.imageFolderPath = "images/posts";
     }
-    if(req.baseUrl === "/api/comment") {
+    if(req.baseUrl === "/comment") {
         req.imageFolderPath = "images/comments";
-    }
-    if(req.baseUrl === "/api/course") {
-        req.imageFolderPath = "images/courses";
-        req.videoFolderPath = "videos/courses";
     }
     next();
 }
