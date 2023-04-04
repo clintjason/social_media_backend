@@ -40,13 +40,30 @@ module.exports = {
       })
     })
   },
-  findByPk: (id) => {
+  findById: (id) => {
     //id, username, email, isAdmin, profile, createdAt, updatedAt
-    const getQuery = "SELECT * FROM users WHERE id = ?";
+    const getQuery = "SELECT id, username, email, isAdmin, profile, createdAt, updatedAt FROM users WHERE id = ?";
     return new Promise((resolve, reject) => {
       db.query(getQuery, [id], (err, res) => {
         err? reject(err) : resolve(res)
       })
     })
   },
+  findAll: () => {
+    //id, username, email, isAdmin, profile, createdAt, updatedAt
+    const getQuery = "SELECT id, username, email, isAdmin, profile, createdAt, updatedAt FROM users";
+    return new Promise((resolve, reject) => {
+      db.query(getQuery, (err, res) => {
+        err? reject(err) : resolve(res)
+      })
+    })
+  },
+  update: (id, data) => {
+    const query = `UPDATE users SET ? WHERE id =?`;
+    return new Promise((resolve, reject) => {
+      db.query(query, [data,id], (err,res) => {
+        err? reject(err) : resolve(res)
+      })
+    })
+  }
 }

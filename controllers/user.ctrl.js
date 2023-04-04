@@ -2,6 +2,43 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/user.model');
 
+const findById = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.params.id)
+    if(user.length == 0) {
+      throw {status: 404, message: "User Not Found"};
+    }
+    res.status(200).json(user[0]);
+  } catch (error) {
+    res.status(error.status ? error.status: 500).json({Error: error.message});
+  }
+}
+
+const findAll = async (req, res) => {
+  try {
+    const user = await userModel.findAll();
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({Error: error});
+  }
+}
+
+const updateOne = async (req, res) => {
+  console.log("update user");
+  try {
+    const user = await userModel.findById(req.params.id)
+    if(user.length == 0) {
+      throw {status: 404, message: "User Not Found"};
+    }
+    const id = req.params.id;
+    const result = await userModel.update(id, req.body)
+    console.log("result is: ", result);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(error.status ? error.status: 500).json({Error: error.message});
+  }
+}
+
 module.exports = {
   signup: async (req, res) => {
     console.log('signup');
@@ -57,4 +94,7 @@ module.exports = {
       res.status(error.status ? error.status: 500).json({"Error": error.message})
     }
   },
+  findById,
+  findAll,
+  updateOne
 }

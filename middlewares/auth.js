@@ -29,9 +29,10 @@ const Authentication = async (req, res, next) => {
         if(req.isAdmin) {
             return next();
         } else {
-            if(req.baseUrl === "/api/user") {
+            if(req.baseUrl === "/user") {
+                console.log("in this one")
                 if(req.method === 'PUT' || req.method === 'DELETE') {
-                    let user = await userModel.findByPk(userId);
+                    let user = await userModel.findById(userId);
                     if(user.length == 0) {
                         throw {status: 404, message: "User not Found"};
                     }
@@ -42,6 +43,8 @@ const Authentication = async (req, res, next) => {
                         throw new Error('User Authentification failed');
                     }
                 } else {
+                    console.log("in where it should be")
+
                     if(!req.userId) {
                         throw new Error('User Authentification failed');
                     }
