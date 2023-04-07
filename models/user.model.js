@@ -65,5 +65,13 @@ module.exports = {
         err? reject(err) : resolve(res)
       })
     })
+  },
+  delete: (id) => {
+    const query = `DELETE FROM users WHERE id = ?`;
+    return new Promise((resolve, reject) => {
+      db.query(query, [id], (err,res) => {
+        err? reject(err) : resolve(res)
+      })
+    })
   }
 }

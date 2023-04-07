@@ -15,5 +15,5 @@ userRouter.post('/login', limiter, checkPwd, checkInputs.checkEmail, userCtrl.lo
 userRouter.get('/', auth, userCtrl.findAll);
 userRouter.get('/:id', auth, userCtrl.findById);
 userRouter.put('/edit/:id', auth, selectImageFolders, imageUploader, userCtrl.updateOne);
-
+userRouter.delete('/:id', auth, userCtrl.deleteOne);
 module.exports = userRouter;

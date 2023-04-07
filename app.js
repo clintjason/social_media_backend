@@ -12,13 +12,6 @@ app.use((req,res,next) => db.initDatabase(req,res,next));
 // Register Body Parser
 app.use(express.json());
 
-app.get('/api', (req, res) => {
-  res.json({
-    success: 1,
-    message: "it's working!"
-  })
-})
-
 app.use('/user/', userRoute);
 app.use('/images', express.static(path.join(__dirname, 'images')));
 

@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
 const userModel = require('../models/user.model');
 
 const findById = async (req, res) => {
@@ -24,24 +25,71 @@ const findAll = async (req, res) => {
 }
 
 const updateOne = async (req, res) => {
-  console.log("update user");
   try {
-    const user = await userModel.findById(req.params.id)
-    if(user.length == 0) {
-      throw {status: 404, message: "User Not Found"};
-    }
+    const userData = req.file ? 
+      {
+        ...JSON.parse(req.body.user),
+        profile: `${req.protocol}://${req.get('host')}/images/users/${req.file.filename}`
+      } : {
+        ...req.body,
+      }
     const id = req.params.id;
-    const result = await userModel.update(id, req.body)
-    console.log("result is: ", result);
-    res.status(200).json(result);
+    if(req.file) {
+      console.log("in file");
+      const user = await userModel.findById(id)
+      if(user.length == 0) {
+        throw {status: 404, message: "User Not Found"};
+      }
+
+      const previousFilename = user[0].profile ? user[0].profile.split('/images/users/')[1] : user[0].profile;
+      if( (previousFilename !== "default.png") && fs.existsSync(`images/users/${previousFilename}`) ) {
+        fs.unlink(`images/users/${previousFilename}`, async (error)=> {
+          if(error) { throw error; }
+          const result = await userModel.update(id, userData)
+          res.status(200).json({message: "User Updated successfully"});
+        });
+      } else {
+        const result = await userModel.update(id, userData)
+        res.status(200).json({message: "User Updated successfully"});
+      }
+    } else {
+      const result = await userModel.update(id, userData)
+      console.log("result is: ", result);
+      res.status(200).json({message: "User Updated successfully"});
+    }
   } catch (error) {
     res.status(error.status ? error.status: 500).json({Error: error.message});
   }
 }
 
+const deleteOne = async (req, res) => {
+  console.log("deleted: ");
+  try {
+    const id = req.params.id;
+    const user = await userModel.findById(id)
+    if(user.length == 0) {
+      throw {status: 404, message: "User Not Found"};
+    }
+    const previousFilename = user[0].profile ? user[0].profile.split('/images/users/')[1] : user[0].profile;
+    console.log(previousFilename);
+    if( (previousFilename !== "default.png") && fs.existsSync(`images/users/${previousFilename}`) ) {
+      fs.unlink(`images/users/${previousFilename}`, async (error)=> {
+        if(error) { throw error; }
+        const result = await userModel.delete(id)
+        res.status(200).json({message: "User deleted successfully"});
+
+      });
+    } else {
+      const result = await userModel.delete(id)
+      res.status(200).json({message: "User deleted successfully"});
+    }
+  } catch (error) {
+    
+  }
+}
+
 module.exports = {
   signup: async (req, res) => {
-    console.log('signup');
     try {
       const found = await userModel.findUserByEmail(req.body.email);
       console.log(found);
@@ -53,7 +101,7 @@ module.exports = {
       const userData = {
         ...req.body,
         password: hashedPwd,
-        profile: "https://res.cloudinary.com/finance-tutoring/image/upload/v1655413937/users/trh0mod2g8ghzw15ep3v.png",
+        profile: `${req.protocol}://${req.get('host')}/images/users/default.png`
       }
       console.log(userData);
       const result = await userModel.createUser(userData);
@@ -96,5 +144,6 @@ module.exports = {
   },
   findById,
   findAll,
-  updateOne
+  updateOne,
+  deleteOne
 }

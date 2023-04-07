@@ -14,12 +14,17 @@ const userModel = require('../models/user.model');
  */
 const Authentication = async (req, res, next) => {
     try {
+        // Make sure once user doesn't exist, token is unuseful
         const token = req.headers.authorization.split(' ')[1];
         const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
         console.log(decodedToken);
         const userId = decodedToken.userId;
         req.userId = userId;
         req.isAdmin = decodedToken.isAdmin;
+        const user = await userModel.findById(req.userId)
+        if(user.length == 0) {
+            throw {status: 404, message: "User No Longer Exist"};
+        }
         console.log("in auth now");
         console.log(req.baseUrl);
         console.log("ADMIN IS: ",req.isAdmin);
@@ -86,7 +91,7 @@ const Authentication = async (req, res, next) => {
             }
          }
     } catch (error) {
-        res.status(403).json({error: !parseInt(error) ? 'Unauthorized Request' : error});
+        res.status(error.status ? error.status : 403).json({error: !parseInt(error) ? 'Unauthorized Request' : error.message});
     }
 }
 
